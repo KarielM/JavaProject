@@ -13,11 +13,11 @@ public class Main {
         String[] fullName = edit.getOrCreateMember();
         int pk = db.getMemberCreateMember(conn, "library_members", fullName);
         running = (pk != -1) ? true : false;
-        System.out.println("Hello, " + fullName[0] + "!");
+//        System.out.println("Hello, " + fullName[0] + "!");
 
 
         while (running){
-            if (pk == 1){
+            if (pk == 1 || pk == 10 || pk == 11){
                 System.out.print("[Add] book, [Re]move book, [Del]ete library member, [V]iew books, [C]heckout a book, [R]eturn book, or [Q]uit> ");
             } else{System.out.print("[V]iew books, [C]heckout book, [R]eturn book, or [Q]uit> ");}
             String action = inputObj.nextLine().toLowerCase();

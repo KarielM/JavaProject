@@ -117,7 +117,7 @@ public class dbClass {
             rs=preparedStatement.executeQuery();
 
             if (rs.next()){
-                System.out.println("Query successfully executed");
+//                System.out.println("Query successfully executed");
 //                System.out.print(rs.getInt("member_id"));
                 return rs.getInt("member_id");
 
