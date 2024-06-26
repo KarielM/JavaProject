@@ -25,7 +25,7 @@ public class Main {
 
             switch(action){
                 case "v":
-                    System.out.print("View [a]ll books, view all [av]ailable books, view by [au]thor, [g]enre, all your [c]hecked-out books or [q]uit.");
+                    System.out.print("View [a]ll books, view all [av]ailable books, view by [au]thor, [g]enre, all your [c]hecked-out books or [q]uit> ");
                     String actionView = inputObj.nextLine().toLowerCase();
                     switch(actionView){
                         case "au":
