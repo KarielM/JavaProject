@@ -169,4 +169,116 @@ public class dbClass {
         }
         return bookList;
     }
+
+    public void deleteMember(Connection conn, String tableName, String[] memberName){
+        PreparedStatement psmt = null;
+
+        try{
+            String query = String.format("DELETE FROM %s WHERE first_name ILIKE ? and last_name ILIKE ?", tableName);
+            psmt = conn.prepareStatement(query);
+            psmt.setString(1, memberName[0]);
+            psmt.setString(2, memberName[1]);
+            int rowsAffected = psmt.executeUpdate();
+            if (rowsAffected == 0){
+                System.out.println("Member doesn't exist.");
+            }else{
+                String status = String.format("%s's membership has been successfully deleted.", memberName[0]);
+                System.out.println(status);
+            }
+        }
+        catch(Exception e){
+            System.out.print(e);
+        }
+    }
+    public void removeBook(Connection conn, String tableName, String[] bookInfo){
+        ResultSet rs = null;
+        PreparedStatement psmt = null;
+        PreparedStatement psmt2 = null;
+
+        try{
+            String query1 = String.format("SELECT * FROM %s WHERE title ILIKE ? and author ILIKE ?", tableName);
+            psmt2 = conn.prepareStatement(query1);
+            psmt2.setString(1, bookInfo[1]);
+            psmt2.setString(2, bookInfo[0]);
+            rs = psmt2.executeQuery();
+
+            if (rs.next()){
+                boolean checked_outFalse = rs.getBoolean("checked_out");
+
+                if (checked_outFalse){
+                    System.out.println("Please wait for the book to be returned to remove it from the library!");
+                }else{
+                    String query = String.format("DELETE FROM %s WHERE author ILIKE ? and title ILIKE ?", tableName);
+                    psmt = conn.prepareStatement(query);
+                    psmt.setString(1, bookInfo[0]);
+                    psmt.setString(2, bookInfo[1]);
+                    int rowsAffected = psmt.executeUpdate();
+                    String book = String.format("%s successfully removed from library.", bookInfo[1]);
+                    System.out.println(book);
+                }
+            } else if (!rs.next()) {
+                System.out.println("Book not found in library.");
+            }
+        }
+        catch(Exception e){
+            System.out.println(e);
+        }
+    }
+    public void addBookToDatabase(Connection conn, String tableName, String[] bookInfo){
+        ResultSet rs = null;
+        PreparedStatement psmt = null;
+
+        try{
+            String query = String.format("INSERT INTO %s(title, author) VALUES (?,?)", tableName);
+            psmt = conn.prepareStatement(query);
+            psmt.setString(1,bookInfo[1]);
+            psmt.setString(2,bookInfo[0]);
+            psmt.executeUpdate();
+            System.out.println("Book successfully added to library!");
+        }
+        catch(SQLException e){
+            if (e.getSQLState().equals("23505")) {
+                System.out.println("This book already exists in your library!");
+            }else{System.out.println(e);}
+            }
+    }
+    public List<String> filterByAuthor(Connection conn, String tableName, String author){
+        ResultSet rs = null;
+        PreparedStatement psmt = null;
+        List<String> titlesMatchingAuthor = new ArrayList<String>();
+
+        try{
+            String query = String.format("SELECT * FROM %s WHERE author ILIKE ?", tableName);
+            psmt = conn.prepareStatement(query);
+            psmt.setString(1, author);
+            rs = psmt.executeQuery();
+
+
+            while(rs.next()){
+                titlesMatchingAuthor.add(rs.getString("title"));
+            } if (!rs.next() && titlesMatchingAuthor.size() == 0){System.out.println("No books in this library match your provided author.");}
+        }
+        catch(Exception e){System.out.println(e);}
+        return titlesMatchingAuthor;
+    }
+    public List<String> filterByGenre(Connection conn, String tableName, String genre){
+        ResultSet rs = null;
+        PreparedStatement psmt = null;
+        List<String> titlesMatchingGenre = new ArrayList<String>();
+
+        try{
+            String query = String.format("SELECT * FROM %s WHERE genre ILIKE ?", tableName);
+            psmt = conn.prepareStatement(query);
+            psmt.setString(1, genre);
+            rs = psmt.executeQuery();
+
+
+            while (rs.next()) {
+                titlesMatchingGenre.add(rs.getString("title"));
+            }if (!rs.next() && titlesMatchingGenre.size() == 0) {System.out.println("No books in this library match your provided genre.");}
+        }
+        catch(Exception e){System.out.println(e);}
+        return titlesMatchingGenre;
+    }
+
 }

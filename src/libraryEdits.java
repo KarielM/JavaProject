@@ -27,9 +27,7 @@ public class libraryEdits {
 
         String result = sb.toString();
         System.out.println(result);
-//        return result;
     }
-
 
     public void viewAvailable(HashMap<String, Boolean> dict) {
         StringBuilder sb = new StringBuilder();
@@ -52,14 +50,10 @@ public class libraryEdits {
             String result = sb.toString();
             System.out.println(result);
         }
-
     }
 
-
-
-
     public String[] getOrCreateMember(){
-        System.out.print("Enter your name> ");
+        System.out.print("Enter full name> ");
         String name = inputObj.nextLine().trim();
 
         String[] fullName = name.split("\\s+");
@@ -70,11 +64,11 @@ public class libraryEdits {
         return new String[] { fullName[0].trim(), fullName[1].trim() };
     }
 
-    public String showMyBooksFormatted(List<String> books) {
+    public void showMyBooksFormatted(List<String> books) {
         StringBuilder sb = new StringBuilder();
 
         if (!books.isEmpty()) {
-            sb.append("You have checked out these books: ");
+            sb.append("You have checked out the following books: ");
 
             for (int i = 0; i < books.size(); i++) {
                 if (i > 0) {
@@ -84,10 +78,35 @@ public class libraryEdits {
             }
 
             String formattedBooks = sb.toString();
-            return formattedBooks;
+            System.out.println(formattedBooks);
         } else {
             System.out.println("You have not checked out any books.");
-            return "You have not checked out any books.";
         }
+    }
+
+    public String[] getBookTitleAndAuthor(){
+        System.out.print("Enter book title> ");
+        String title = inputObj.nextLine().trim();
+
+        System.out.print("Enter book author> ");
+        String author = inputObj.nextLine().trim();
+        return new String[] {author, title};
+    }
+
+    public void formatList(List<String> books){
+        StringBuilder sb = new StringBuilder();
+
+        if (!books.isEmpty()){
+            sb.append("Here are the books that match your search: ");
+
+            for (int i = 0; i < books.size(); i++){
+                if (i >0){
+                    sb.append(", ");
+                }sb.append(books.get(i));
+            }
+            String formattedString = sb.toString();
+            System.out.println(formattedString);
+        }
+        else{System.out.println(" ");}
     }
 }
