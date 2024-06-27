@@ -87,6 +87,7 @@ public class libraryEdits {
     public String[] getBookTitleAndAuthor(){
         System.out.print("Enter book title> ");
         String title = inputObj.nextLine().trim();
+        validateStringInput(title);
 
         System.out.print("Enter book author> ");
         String author = inputObj.nextLine().trim();
@@ -113,10 +114,11 @@ public class libraryEdits {
 
     public String validateStringInput(String inputFromUser){
         String inputToCheck = inputFromUser;
-        while (!inputToCheck.matches("[a-zA-Z ]+")){
+        while (!inputToCheck.matches("^(?=.*[a-zA-Z])[a-zA-Z0-9 ]+$")){
             System.out.print("Invalid input provided. Please use only letters.");
             inputToCheck = inputObj.nextLine();
         }
         return inputToCheck;
     }
+
 }
