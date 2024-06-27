@@ -43,21 +43,22 @@ public class dbClass {
         return booksHashMap;
     }
 
-    public void checkoutBook(Connection conn, String tableName, String title, int member_id){
-        PreparedStatement selectStatement = null;
-        PreparedStatement updateStatement = null;
+    public void checkoutBook(Connection conn, String tableName, String[] title, int member_id){
+        PreparedStatement psmt = null;
+        PreparedStatement psmt2 = null;
         ResultSet rs=null;
         try{
-            String selectQuery = String.format("SELECT * FROM %s WHERE title ILIKE ? AND checked_out = false", tableName);
-            selectStatement = conn.prepareStatement(selectQuery);
-            selectStatement.setString(1, title);
-            rs = selectStatement.executeQuery();
+            String selectQuery = String.format("SELECT * FROM %s WHERE title ILIKE ? AND author ILIKE ? AND checked_out = false", tableName);
+            psmt = conn.prepareStatement(selectQuery);
+            psmt.setString(1, title[1]);
+            psmt.setString(2, title[0]);
+            rs = psmt.executeQuery();
 
             if (rs.next()) {
                 String updateQuery = String.format("UPDATE %s SET checked_out = true WHERE title ILIKE ?", tableName);
-                updateStatement = conn.prepareStatement(updateQuery);
-                updateStatement.setString(1, title);
-                updateStatement.executeUpdate();
+                psmt2 = conn.prepareStatement(updateQuery);
+                psmt2.setString(1, title[1]);
+                psmt2.executeUpdate();
                 System.out.println("Book checked out successfully.");
 
 
@@ -74,21 +75,24 @@ public class dbClass {
         catch(Exception e){System.out.println(e);}
     }
 
-    public void returnBook(Connection conn, String tableName, String book, String secondTable){
-        PreparedStatement selectStatement = null;
-        PreparedStatement updateStatement = null;
+    public void returnBook(Connection conn, String tableName, String[] book, String secondTable){
+        PreparedStatement psmt = null;
+        PreparedStatement psmt2 = null;
         ResultSet rs=null;
+
         try {
-            String selectQuery = String.format("SELECT * FROM %s WHERE title ILIKE ? AND checked_out = true", tableName);
-            selectStatement = conn.prepareStatement(selectQuery);
-            selectStatement.setString(1, book);
-            rs = selectStatement.executeQuery();
+            String selectQuery = String.format("SELECT * FROM %s WHERE title ILIKE ? AND author ILIKE ? AND checked_out = true", tableName);
+            psmt = conn.prepareStatement(selectQuery);
+            psmt.setString(1, book[1]);
+            psmt.setString(2, book[0]);
+            rs = psmt.executeQuery();
+
             if (rs.next()) {
                 int bookId = rs.getInt("isbn");
                 String updateQuery = String.format("UPDATE %s SET checked_out = false WHERE title ILIKE ?", tableName);
-                updateStatement = conn.prepareStatement(updateQuery);
-                updateStatement.setString(1, book);
-                updateStatement.executeUpdate();
+                psmt2 = conn.prepareStatement(updateQuery);
+                psmt2.setString(1, book[1]);
+                psmt2.executeUpdate();
                 System.out.println("Book returned successfully.");
 
                 String newQuery = String.format("DELETE FROM %s WHERE book_id = ?", secondTable);
@@ -96,14 +100,14 @@ public class dbClass {
                 statement.setInt(1, bookId);
                 statement.executeUpdate();
 
-
             }  else {
-                System.out.println("Invalid.");
+                System.out.println("Book not available or already returned.");
             }
         }catch(Exception e){
             System.out.println(e);
         }
     }
+
     public int getMemberCreateMember(Connection conn, String tableName, String[] memberName){
         ResultSet rs=null;
         Statement statement = null;
@@ -172,18 +176,34 @@ public class dbClass {
 
     public void deleteMember(Connection conn, String tableName, String[] memberName){
         PreparedStatement psmt = null;
+        PreparedStatement psmt2 = null;
+        ResultSet rs = null;
+        Integer pkOfMemberToDelete = null;
 
-        try{
-            String query = String.format("DELETE FROM %s WHERE first_name ILIKE ? and last_name ILIKE ?", tableName);
+        try {
+            String query = String.format("SELECT * FROM %s WHERE first_name ILIKE ? and last_name ILIKE ?", tableName);
             psmt = conn.prepareStatement(query);
             psmt.setString(1, memberName[0]);
             psmt.setString(2, memberName[1]);
-            int rowsAffected = psmt.executeUpdate();
-            if (rowsAffected == 0){
+
+//            int rowsAffected = psmt.executeUpdate();
+            rs = psmt.executeQuery();
+
+            if (rs.next()) {
+                pkOfMemberToDelete = rs.getInt("member_id");
+
+                if (pkOfMemberToDelete != 10 && pkOfMemberToDelete != 11 && pkOfMemberToDelete != 12) {
+                    String deleteQuery = String.format("DELETE FROM %s WHERE first_name ILIKE ? AND last_name ILIKE ?", tableName);
+                    psmt2 = conn.prepareStatement(deleteQuery);
+                    psmt2.setString(1, memberName[0]);
+                    psmt2.setString(2, memberName[1]);
+                    psmt2.executeUpdate();
+                    System.out.println("Member deleted successfully.");
+                } else {
+                    System.out.println("Unable to delete admin from system.");
+                }
+            } else {
                 System.out.println("Member doesn't exist.");
-            }else{
-                String status = String.format("%s's membership has been successfully deleted.", memberName[0]);
-                System.out.println(status);
             }
         }
         catch(Exception e){
@@ -224,15 +244,21 @@ public class dbClass {
             System.out.println(e);
         }
     }
-    public void addBookToDatabase(Connection conn, String tableName, String[] bookInfo){
+
+    public void addBookToDatabase(Connection conn, String tableName, String[] bookInfo, String genre){
         ResultSet rs = null;
         PreparedStatement psmt = null;
 
         try{
-            String query = String.format("INSERT INTO %s(title, author) VALUES (?,?)", tableName);
+            String query = String.format("INSERT INTO %s(title, author, genre) VALUES (?,?,?)", tableName);
             psmt = conn.prepareStatement(query);
             psmt.setString(1,bookInfo[1]);
             psmt.setString(2,bookInfo[0]);
+            if (genre != null && !genre.trim().isEmpty()) {
+                psmt.setString(3, genre);
+            } else {
+                psmt.setNull(3, java.sql.Types.VARCHAR);
+            }
             psmt.executeUpdate();
             System.out.println("Book successfully added to library!");
         }

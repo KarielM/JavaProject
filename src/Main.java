@@ -17,7 +17,7 @@ public class Main {
 
 
         while (running){
-            if (pk == 1 || pk == 10 || pk == 11){
+            if (pk == 12 || pk == 10 || pk == 11){
                 System.out.print("[Add] book, [Re]move book, [Del]ete library member, [V]iew books, [C]heckout a book, [R]eturn book, or [Q]uit> ");
             } else{System.out.print("[V]iew books, [C]heckout book, [R]eturn book, or [Q]uit> ");}
             String action = inputObj.nextLine().toLowerCase();
@@ -62,29 +62,33 @@ public class Main {
                 case "c":
                     System.out.println("");
                     edit.viewAvailable(booksDict);
-                    System.out.print("Which book> ");
-                    String title = inputObj.nextLine();
-                    db.checkoutBook(conn, tableName, title, pk);
+                    String[] bookToCheckoutInfo = edit.getBookTitleAndAuthor();
+                    db.checkoutBook(conn, tableName, bookToCheckoutInfo, pk);
                     break;
                 case "r":
                     List<String> bookList = db.viewAllBooksIHaveCheckedOut(conn, pk, "borrowed_book");
                     System.out.println(" ");
                     edit.showMyBooksFormatted(bookList);
 
-                    System.out.print("Which book would you like to return> ");
-                    String title2 = inputObj.nextLine();
-                    db.returnBook(conn, tableName, title2, "borrowed_book");
+                    if (bookList.size() != 0) {
+                        String[] bookToReturnInfo = edit.getBookTitleAndAuthor();
+                        db.returnBook(conn, tableName, bookToReturnInfo, "borrowed_book");
+                }
+
                     break;
                 case "q":
                     running = false;
                     break;
                 default:
-                    if (pk == 1) {
+                    if (pk == 12 || pk == 10 || pk == 11) {
                         switch (action) {
                             case "add":
                                 String[] newBookInfo = edit.getBookTitleAndAuthor();
-                                db.addBookToDatabase(conn, tableName, newBookInfo);
-                                System.out.println("add book");
+                                System.out.print("Enter genre or press enter to skip> ");
+                                String potentialGenre =inputObj.nextLine().trim();
+                                String reviewedGenre = edit.validateStringInput(potentialGenre);
+
+                                db.addBookToDatabase(conn, tableName, newBookInfo, reviewedGenre);
                                 break;
                             case "re":
                                 String[] bookStuff = edit.getBookTitleAndAuthor();

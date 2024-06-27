@@ -90,6 +90,7 @@ public class libraryEdits {
 
         System.out.print("Enter book author> ");
         String author = inputObj.nextLine().trim();
+        validateStringInput(author);
         return new String[] {author, title};
     }
 
@@ -108,5 +109,14 @@ public class libraryEdits {
             System.out.println(formattedString);
         }
         else{System.out.println(" ");}
+    }
+
+    public String validateStringInput(String inputFromUser){
+        String inputToCheck = inputFromUser;
+        while (!inputToCheck.matches("[a-zA-Z ]+")){
+            System.out.print("Invalid input provided. Please use only letters.");
+            inputToCheck = inputObj.nextLine();
+        }
+        return inputToCheck;
     }
 }
